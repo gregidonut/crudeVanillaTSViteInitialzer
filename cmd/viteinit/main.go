@@ -2,14 +2,16 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("please define project name as first argument")
+	currentDir, err := os.Getwd()
+	if err != nil {
+		log.Printf("Error: %v\n", err)
 		return
 	}
 
-	fmt.Println("First argument:", os.Args[1])
+	fmt.Println("Current Directory:", currentDir)
 }
