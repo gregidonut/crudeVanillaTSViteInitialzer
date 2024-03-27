@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 func main() {
@@ -13,5 +14,6 @@ func main() {
 		return
 	}
 
-	fmt.Println("Current Directory:", currentDir)
+	projectName := filepath.Base(currentDir)
+	fmt.Println("project name:", projectName)
 }
