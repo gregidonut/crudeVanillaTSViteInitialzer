@@ -1,25 +1,40 @@
-# crudVanillaTSViteInitializer
+# crudeVanillaTSViteInitializer
 
-
-Is a simple easy to break script in golang to 
-initialize vanilla-ts vite project with the 
-following: 
+Is a simple easy to break script in golang to
+initialize vanilla-ts vite project with the
+following:
 
 - eslint
 - prettier
 - git
-- a crude implementation of a file walker to 
-  imitate a static file server using 
-  directories as page names if they have an 
+- a crude implementation of a file walker to
+  imitate a static file server using
+  directories as page names if they have an
   index.html file in them
-- a hello world equivalent root index.html 
-  using the apps first argument as the name of 
-  the project, root html title and h1 text content
+- a hello world equivalent root index.html
+  using the app's working directory as the
+  name of the project, root html title and h1 text
+  content
 
-I really wanted to craft a better 
-implementation of this as a portfolio project 
-that demonstrates my knowledge in viper and 
-cobra-cli but it seems I've been needing to 
-make this a lot recently and its just getting 
-in my nerves how I can't just set this up in 
+I really wanted to craft a better
+implementation of this as a portfolio project
+that demonstrates my knowledge in viper and
+cobra-cli but it seems I've been needing to
+make this a lot recently and its just getting
+in my nerves how I can't just set this up in
 webstorm 
+
+## Limitations
+
+- biggest one right now is the project name it 
+  can only do lowercase letters or the create 
+  vite command will ask for a prompt which I 
+  do not want to deal with yet. would be nice 
+  if the app can do camelcase dir names as the 
+  project name or maybe even spaces?? nah.
+- I'd also want to put an flag argument where 
+  the html h1 and title can be changed or 
+  prefixed or suffixed by something like if i 
+  the project name was 'bar' I could do a 
+  --pref="foo" and then the title and h1 would 
+  be 'foo bar' or something like that
