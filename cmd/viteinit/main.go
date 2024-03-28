@@ -19,7 +19,7 @@ func main() {
 	// manifest.errors should never be nil because I initialize my
 	// slices not just declare them.
 	if manifest.errors == nil {
-		log.Fatal("manifest errors is nil")
+		log.Fatal("manifest.errors is nil")
 	}
 
 	if len(manifest.errors) > 0 {
@@ -151,7 +151,7 @@ func errorCheck() projectManifest {
 				resultChan <- errorCheckResult{
 					referenceAppPath: "",
 					err: fmt.Errorf(
-						"directory from env var '%s' does not exist", referenceAppPath,
+						"directory '%s' from env var does not exist", referenceAppPath,
 					),
 				}
 				return
