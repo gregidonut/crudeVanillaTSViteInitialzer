@@ -1,12 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"io"
+	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/runcommand"
 	"log"
-	"os"
-	"os/exec"
 )
 
 const (
@@ -15,27 +11,22 @@ const (
 )
 
 func main() {
-	runCmd(
-		"create vite app...",
-		NPX,
-		[]string{"create-vite@latest", ".", "--template", "vanilla-ts", "--force"},
-	)
-	runCmd(
-		"removing public, src, gitignore and root html...",
-		RM,
-		[]string{"-r", "public", "src", ".gitignore", "index.html"},
-	)
-}
+	commands := []runcommand.Command{
+		{
+			Comment: "create vite app...",
+			Cmd:     NPX,
+			Args:    []string{"create-vite@latest", ".", "--template", "vanilla-ts", "--force"},
+		},
+		{
+			Comment: "removing public, src, gitignore and root html...",
+			Cmd:     RM,
+			Args:    []string{"-r", "public", "src", ".gitignore", "index.html"},
+		},
+	}
 
-func runCmd(comment, command string, args []string) {
-	fmt.Println(comment)
-	cmd := exec.Command(command, args...)
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = io.MultiWriter(os.Stdout, &stdout)
-	cmd.Stderr = io.MultiWriter(os.Stderr, &stderr)
-
-	err := cmd.Run()
-	if err != nil {
-		log.Fatalf("cmd.Run() failed with %s\n", err)
+	for _, command := range commands {
+		if err := command.RunCmd(); err != nil {
+			log.Fatal(err)
+		}
 	}
 }
