@@ -29,6 +29,21 @@ func main() {
 			Args:    []string{"create", "vite@latest", ".", "--", "--template", "vanilla-ts"},
 		},
 		{
+			Comment: "installing initial vite app...",
+			Cmd:     "npm",
+			Args: []string{
+				"install",
+				"eslint",
+				"prettier",
+				"@typescript-eslint/eslint-plugin",
+				"@typescript-eslint/parser",
+				"eslint-config-prettier",
+				"eslint-plugin-import",
+				"@types/node",
+				"--save-dev",
+			},
+		},
+		{
 			Comment: "removing public, src, gitignore and root html...",
 			Cmd:     "rm",
 			Args:    []string{"-r", "public", "src", ".gitignore", "index.html"},
