@@ -3,9 +3,25 @@ package main
 import (
 	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/runcommand"
 	"log"
+	"os"
+	"path/filepath"
+	"unicode"
 )
 
 func main() {
+	currentDir, err := os.Getwd()
+	if err != nil {
+		log.Fatalln("Error:", err)
+		return
+	}
+
+	projectName := filepath.Base(currentDir)
+	for _, char := range projectName {
+		if unicode.IsUpper(char) {
+			log.Fatalf("Error: project name: '%s' cannot have upper case letters\n", projectName)
+		}
+	}
+
 	commands := []runcommand.Command{
 		{
 			Comment: "create vite app...",
