@@ -13,17 +13,25 @@ import (
 const VITEINIT_REFERENCE_PATH = "VITEINIT_REFERENCE_PATH"
 
 func main() {
-	fmt.Println("---------------------")
-	fmt.Println()
-	referenceAppPath, errors := errorCheck()
-	if len(errors) > 0 || errors == nil {
-		for _, err := range errors {
-			if _, err = fmt.Fprintf(os.Stderr, "Error: %v\n", err); err != nil {
+	manifest := errorCheck()
+
+	// this one is more of a programmer error than a user one the
+	// manifest.errors should never be nil because I initialize my
+	// slices not just declare them.
+	if manifest.errors == nil {
+		log.Fatal("manifest errors is nil")
+	}
+
+	if len(manifest.errors) > 0 {
+		for _, err := range manifest.errors {
+			if _, err = fmt.Fprintf(os.Stderr, "error: %v\n", err); err != nil {
 				log.Fatal(err)
 			}
 		}
 		os.Exit(1)
 	}
+
+	fmt.Println("Project name: ", manifest.projectName)
 
 	commands := []runcommand.Command{
 		{
@@ -56,13 +64,13 @@ func main() {
 			Cmd:     "cp",
 			Args: []string{
 				"-r",
-				filepath.Join(referenceAppPath, "src"),
-				filepath.Join(referenceAppPath, ".eslintrc.cjs"),
-				filepath.Join(referenceAppPath, ".eslintignore"),
-				filepath.Join(referenceAppPath, ".prettierrc.cjs"),
-				filepath.Join(referenceAppPath, ".prettierignore"),
-				filepath.Join(referenceAppPath, "vite.config.ts"),
-				filepath.Join(referenceAppPath, ".gitignore"),
+				filepath.Join(manifest.referenceAppPath, "src"),
+				filepath.Join(manifest.referenceAppPath, ".eslintrc.cjs"),
+				filepath.Join(manifest.referenceAppPath, ".eslintignore"),
+				filepath.Join(manifest.referenceAppPath, ".prettierrc.cjs"),
+				filepath.Join(manifest.referenceAppPath, ".prettierignore"),
+				filepath.Join(manifest.referenceAppPath, "vite.config.ts"),
+				filepath.Join(manifest.referenceAppPath, ".gitignore"),
 				".",
 			},
 		},
@@ -74,15 +82,22 @@ func main() {
 	}
 }
 
-func errorCheck() (string, []error) {
+type projectManifest struct {
+	projectName      string
+	referenceAppPath string
+	errors           []error
+}
+
+func errorCheck() projectManifest {
 	wg := sync.WaitGroup{}
 
-	type result struct {
+	type errorCheckResult struct {
+		projectName      string
 		referenceAppPath string
 		err              error
 	}
 
-	resultChan := make(chan result)
+	resultChan := make(chan errorCheckResult)
 	errors := []error{}
 
 	wg.Add(1)
@@ -91,7 +106,7 @@ func errorCheck() (string, []error) {
 
 		currentDir, err := os.Getwd()
 		if err != nil {
-			resultChan <- result{
+			resultChan <- errorCheckResult{
 				err: fmt.Errorf("error: %v", err),
 			}
 			return
@@ -102,13 +117,17 @@ func errorCheck() (string, []error) {
 		// and I want to avoid dealing with prompts
 		for _, char := range projectName {
 			if unicode.IsUpper(char) {
-				resultChan <- result{
+				resultChan <- errorCheckResult{
 					err: fmt.Errorf(
 						"error: project name: '%s' cannot have upper case letters", projectName,
 					),
 				}
 				return
 			}
+		}
+
+		resultChan <- errorCheckResult{
+			projectName: projectName,
 		}
 	}()
 
@@ -118,7 +137,7 @@ func errorCheck() (string, []error) {
 
 		referenceAppPath := os.Getenv(VITEINIT_REFERENCE_PATH)
 		if referenceAppPath == "" {
-			resultChan <- result{
+			resultChan <- errorCheckResult{
 				referenceAppPath: "",
 				err: fmt.Errorf(
 					"could not get reference path at '%s' env var", VITEINIT_REFERENCE_PATH,
@@ -129,7 +148,7 @@ func errorCheck() (string, []error) {
 		_, err := os.Stat(referenceAppPath)
 		if err != nil {
 			if os.IsNotExist(err) {
-				resultChan <- result{
+				resultChan <- errorCheckResult{
 					referenceAppPath: "",
 					err: fmt.Errorf(
 						"directory from env var '%s' does not exist", referenceAppPath,
@@ -137,14 +156,14 @@ func errorCheck() (string, []error) {
 				}
 				return
 			}
-			resultChan <- result{
+			resultChan <- errorCheckResult{
 				referenceAppPath: "",
 				err:              fmt.Errorf("error: %v", err),
 			}
 			return
 		}
 
-		resultChan <- result{
+		resultChan <- errorCheckResult{
 			referenceAppPath: referenceAppPath,
 		}
 	}()
@@ -154,22 +173,25 @@ func errorCheck() (string, []error) {
 		close(resultChan)
 	}()
 
-	referenceAppPath := ""
+	manifest := projectManifest{}
 
 outer:
 	for {
 		select {
 		case r, ok := <-resultChan:
-			if !ok {
+			switch {
+			case !ok:
 				break outer
-			}
-			if r.err != nil {
+			case r.err != nil:
 				errors = append(errors, r.err)
-				continue
+			case r.referenceAppPath != "":
+				manifest.referenceAppPath = r.referenceAppPath
+			case r.projectName != "":
+				manifest.projectName = r.projectName
 			}
-			referenceAppPath = r.referenceAppPath
 		}
 	}
+	manifest.errors = errors
 
-	return referenceAppPath, errors
+	return manifest
 }
