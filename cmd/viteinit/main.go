@@ -5,21 +5,16 @@ import (
 	"log"
 )
 
-const (
-	NPX = "npx"
-	RM  = "rm"
-)
-
 func main() {
 	commands := []runcommand.Command{
 		{
 			Comment: "create vite app...",
-			Cmd:     NPX,
-			Args:    []string{"create-vite@latest", ".", "--template", "vanilla-ts", "--force"},
+			Cmd:     "npm",
+			Args:    []string{"create", "vite@latest", ".", "--", "--template", "vanilla-ts"},
 		},
 		{
 			Comment: "removing public, src, gitignore and root html...",
-			Cmd:     RM,
+			Cmd:     "rm",
 			Args:    []string{"-r", "public", "src", ".gitignore", "index.html"},
 		},
 	}
