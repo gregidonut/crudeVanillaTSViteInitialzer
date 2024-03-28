@@ -3,27 +3,27 @@ package main
 import (
 	"fmt"
 	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/runcommand"
+	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/utils"
 	"log"
 	"os"
 	"path/filepath"
 	"sync"
-	"unicode"
 )
 
 const VITEINIT_REFERENCE_PATH = "VITEINIT_REFERENCE_PATH"
 
 func main() {
-	manifest := errorCheck()
+	manifest := utils.ErrorCheck()
 
 	// this one is more of a programmer error than a user one the
 	// manifest.errors should never be nil because I initialize my
 	// slices not just declare them.
-	if manifest.errors == nil {
+	if manifest.Errors == nil {
 		log.Fatal("manifest.errors is nil")
 	}
 
-	if len(manifest.errors) > 0 {
-		for _, err := range manifest.errors {
+	if len(manifest.Errors) > 0 {
+		for _, err := range manifest.Errors {
 			if _, err = fmt.Fprintf(os.Stderr, "error: %v\n", err); err != nil {
 				log.Fatal(err)
 			}
@@ -31,7 +31,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Project name: ", manifest.projectName)
+	fmt.Println("Project name: ", manifest.ProjectName)
 
 	initialCommands := []runcommand.Command{
 		{
@@ -64,13 +64,13 @@ func main() {
 			Cmd:     "cp",
 			Args: []string{
 				"-r",
-				filepath.Join(manifest.referenceAppPath, "src"),
-				filepath.Join(manifest.referenceAppPath, ".eslintrc.cjs"),
-				filepath.Join(manifest.referenceAppPath, ".eslintignore"),
-				filepath.Join(manifest.referenceAppPath, ".prettierrc.cjs"),
-				filepath.Join(manifest.referenceAppPath, ".prettierignore"),
-				filepath.Join(manifest.referenceAppPath, "vite.config.ts"),
-				filepath.Join(manifest.referenceAppPath, ".gitignore"),
+				filepath.Join(manifest.ReferenceAppPath, "src"),
+				filepath.Join(manifest.ReferenceAppPath, ".eslintrc.cjs"),
+				filepath.Join(manifest.ReferenceAppPath, ".eslintignore"),
+				filepath.Join(manifest.ReferenceAppPath, ".prettierrc.cjs"),
+				filepath.Join(manifest.ReferenceAppPath, ".prettierignore"),
+				filepath.Join(manifest.ReferenceAppPath, "vite.config.ts"),
+				filepath.Join(manifest.ReferenceAppPath, ".gitignore"),
 				".",
 			},
 		},
@@ -93,7 +93,7 @@ func main() {
 				Cmd:     "sed",
 				Args: []string{
 					"-i",
-					fmt.Sprintf("s|<title>[^<]*<\\/title>|<title>%s<\\/title>|g", manifest.projectName),
+					fmt.Sprintf("s|<title>[^<]*<\\/title>|<title>%s<\\/title>|g", manifest.ProjectName),
 					"src/index.html",
 				},
 			},
@@ -102,7 +102,7 @@ func main() {
 				Cmd:     "sed",
 				Args: []string{
 					"-i",
-					fmt.Sprintf("s|<h1>[^<]*<\\/h1>|<h1>%s<\\/h1>|g", manifest.projectName),
+					fmt.Sprintf("s|<h1>[^<]*<\\/h1>|<h1>%s<\\/h1>|g", manifest.ProjectName),
 					"src/index.html",
 				},
 			},
@@ -174,118 +174,4 @@ func main() {
 
 	}
 
-}
-
-type projectManifest struct {
-	projectName      string
-	referenceAppPath string
-	errors           []error
-}
-
-func errorCheck() projectManifest {
-	wg := sync.WaitGroup{}
-
-	type errorCheckResult struct {
-		projectName      string
-		referenceAppPath string
-		err              error
-	}
-
-	resultChan := make(chan errorCheckResult)
-	errors := []error{}
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		currentDir, err := os.Getwd()
-		if err != nil {
-			resultChan <- errorCheckResult{
-				err: fmt.Errorf("error: %v", err),
-			}
-			return
-		}
-
-		projectName := filepath.Base(currentDir)
-		// vite prompts for name if project name is not lowercase
-		// and I want to avoid dealing with prompts
-		for _, char := range projectName {
-			if unicode.IsUpper(char) {
-				resultChan <- errorCheckResult{
-					err: fmt.Errorf(
-						"error: project name: '%s' cannot have upper case letters", projectName,
-					),
-				}
-				return
-			}
-		}
-
-		resultChan <- errorCheckResult{
-			projectName: projectName,
-		}
-	}()
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-
-		referenceAppPath := os.Getenv(VITEINIT_REFERENCE_PATH)
-		if referenceAppPath == "" {
-			resultChan <- errorCheckResult{
-				referenceAppPath: "",
-				err: fmt.Errorf(
-					"could not get reference path at '%s' env var", VITEINIT_REFERENCE_PATH,
-				),
-			}
-			return
-		}
-		_, err := os.Stat(referenceAppPath)
-		if err != nil {
-			if os.IsNotExist(err) {
-				resultChan <- errorCheckResult{
-					referenceAppPath: "",
-					err: fmt.Errorf(
-						"directory '%s' from env var does not exist", referenceAppPath,
-					),
-				}
-				return
-			}
-			resultChan <- errorCheckResult{
-				referenceAppPath: "",
-				err:              fmt.Errorf("error: %v", err),
-			}
-			return
-		}
-
-		resultChan <- errorCheckResult{
-			referenceAppPath: referenceAppPath,
-		}
-	}()
-
-	go func() {
-		wg.Wait()
-		close(resultChan)
-	}()
-
-	manifest := projectManifest{}
-
-outer:
-	for {
-		select {
-		case r, ok := <-resultChan:
-			switch {
-			case !ok:
-				break outer
-			case r.err != nil:
-				errors = append(errors, r.err)
-			case r.referenceAppPath != "":
-				manifest.referenceAppPath = r.referenceAppPath
-			case r.projectName != "":
-				manifest.projectName = r.projectName
-			}
-		}
-	}
-	manifest.errors = errors
-
-	return manifest
 }
