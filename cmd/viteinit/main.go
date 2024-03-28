@@ -11,6 +11,7 @@ import (
 
 const (
 	NPX = "npx"
+	RM  = "rm"
 )
 
 func main() {
@@ -18,6 +19,11 @@ func main() {
 		"create vite app...",
 		NPX,
 		[]string{"create-vite@latest", ".", "--template", "vanilla-ts", "--force"},
+	)
+	runCmd(
+		"removing public, src, gitignore and root html...",
+		RM,
+		[]string{"-r", "public", "src", ".gitignore", "index.html"},
 	)
 }
 
