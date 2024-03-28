@@ -16,6 +16,8 @@ func main() {
 	}
 
 	projectName := filepath.Base(currentDir)
+	// vite prompts for name if project name is not lowercase
+	// and I want to avoid dealing with prompts
 	for _, char := range projectName {
 		if unicode.IsUpper(char) {
 			log.Fatalf("Error: project name: '%s' cannot have upper case letters\n", projectName)
@@ -49,7 +51,6 @@ func main() {
 			Args:    []string{"-r", "public", "src", ".gitignore", "index.html"},
 		},
 	}
-
 	for _, command := range commands {
 		if err := command.RunCmd(); err != nil {
 			log.Fatal(err)
