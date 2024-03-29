@@ -56,3 +56,15 @@ with prefix
 ```shell
 env VITEINIT_REFERENCE_PATH=/path/to/referenceapp  ./path/to/binary -pref <string>
 ```
+
+On my computer I sym-linked the 
+`path/to/the/repo/cmd/viteinit/refernceapp` to a 
+`~/.config` directory named 'viteinit' I just 
+thought it was a good place for it, compiled the 
+binary to `~/bin` as `viteinit` and exported 
+the environment variable in my `~/.zshrc` so i 
+can just go:
+
+```shell
+viteinit
+```
