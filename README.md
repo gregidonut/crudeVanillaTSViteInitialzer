@@ -38,3 +38,21 @@ webstorm
   the project name was 'bar' I could do a 
   --pref="foo" and then the title and h1 would 
   be 'foo bar' or something like that
+
+## Installation 
+
+1. compile the binary after cloning the repo
+2. copy or move the referenceapp dir to 
+   somewhere suitable
+
+## Usage
+
+no prefix
+```shell
+env VITEINIT_REFERENCE_PATH=/path/to/referenceapp  ./path/to/binary
+```
+
+with prefix
+```shell
+env VITEINIT_REFERENCE_PATH=/path/to/referenceapp  ./path/to/binary -pref <string>
+```
