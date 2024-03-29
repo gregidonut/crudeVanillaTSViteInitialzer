@@ -167,8 +167,10 @@ func main() {
 				`- vanilla-ts vite, with prettier and eslint
 - added node.gitignore github template to vite generated gitignore
 - implemented a crude directory walk in the vite.config.ts file so that
-  I can mimic regular static file server
-- got to hello world equivalent index.html`,
+  I can mimic a regular static file server
+- got to hello world equivalent index.html
+- also added some styles with colors  that's sort of inspired by the
+  dracula theme`,
 			},
 		},
 	}
