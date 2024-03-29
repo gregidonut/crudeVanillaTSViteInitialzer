@@ -32,13 +32,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Project name: ", manifest.ProjectName)
+	fmt.Println("Project pref: ", manifest.ProjectName)
 
-	name := ""
-	flag.StringVar(&name, "pref", "", "prefix the project name string for the html's title and h1")
+	pref := ""
+	flag.StringVar(&pref, "pref", "", "prefix the project pref string for the html's title and h1")
 	flag.Parse()
-	if name != "" {
-		manifest.ProjectName = fmt.Sprintf("%s %s", name, manifest.ProjectName)
+	if pref != "" {
+		manifest.ProjectName = fmt.Sprintf("%s %s", pref, manifest.ProjectName)
 	}
 
 	initialCommands := []runcommand.Command{
