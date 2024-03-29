@@ -15,6 +15,8 @@ following:
   using the app's working directory as the
   name of the project, root html title and h1 text
   content
+- also added some styles with colors  that's 
+  sort of inspired by the [ dracula theme ][1]
 
 I really wanted to craft a better
 implementation of this as a portfolio project
@@ -68,3 +70,5 @@ can just go:
 ```shell
 viteinit
 ```
+
+[1]: https://draculatheme.com/contribute
