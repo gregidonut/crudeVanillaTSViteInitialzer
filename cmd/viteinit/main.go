@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/runcommand"
 	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/utils"
@@ -32,6 +33,13 @@ func main() {
 	}
 
 	fmt.Println("Project name: ", manifest.ProjectName)
+
+	name := ""
+	flag.StringVar(&name, "pref", "", "prefix the project name string for the html's title and h1")
+	flag.Parse()
+	if name != "" {
+		manifest.ProjectName = fmt.Sprintf("%s %s", name, manifest.ProjectName)
+	}
 
 	initialCommands := []runcommand.Command{
 		{
