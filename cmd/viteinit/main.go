@@ -11,8 +11,6 @@ import (
 	"sync"
 )
 
-const VITEINIT_REFERENCE_PATH = "VITEINIT_REFERENCE_PATH"
-
 func main() {
 	manifest := utils.ErrorCheck()
 
