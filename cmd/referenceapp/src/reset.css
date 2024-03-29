@@ -52,3 +52,19 @@ div#layout {
         width: 120rem;
     }
 }
+
+a:link {
+    color: #6272A4;
+}
+a:visited {
+    color: #bd93f9;
+}
+a:hover {
+    color: #6272A4;
+}
+a:active {
+    color: #ff5555;
+}
+a:focus {
+    outline: thin dotted;
+}
