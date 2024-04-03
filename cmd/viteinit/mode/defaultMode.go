@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/runcommand"
 	"github.com/gregidonut/crudeVanillaTSViteInitialzer/cmd/viteinit/utils"
-	"log"
 	"path/filepath"
 	"sync"
 )
@@ -57,12 +56,12 @@ func RunDefaultMode(manifest utils.ProjectManifest) error {
 	}
 	for _, command := range initialCommands {
 		if err := command.RunCmd(); err != nil {
-			log.Fatal(err)
+			return err
 		}
 	}
 
 	wg := sync.WaitGroup{}
-
+	sedCommandsErrorChan := make(chan error, 2)
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
@@ -90,7 +89,8 @@ func RunDefaultMode(manifest utils.ProjectManifest) error {
 
 		for _, command := range sedCommandsForIndexHtml {
 			if err := command.RunCmd(); err != nil {
-				log.Fatal(err)
+				sedCommandsErrorChan <- err
+				return
 			}
 		}
 	}()
@@ -109,10 +109,30 @@ func RunDefaultMode(manifest utils.ProjectManifest) error {
 			},
 		}
 		if err := sedCommandsForPackageJson.RunCmd(); err != nil {
-			log.Fatal(err)
+			sedCommandsErrorChan <- err
+			return
 		}
 	}()
-	wg.Wait()
+
+	go func() {
+		wg.Wait()
+		close(sedCommandsErrorChan)
+	}()
+outer:
+	for {
+		select {
+		case err, ok := <-sedCommandsErrorChan:
+			if err != nil {
+				return err
+			}
+			if !ok {
+				if err != nil {
+					return err
+				}
+				break outer
+			}
+		}
+	}
 
 	gitCommands := []runcommand.Command{
 		{
@@ -151,7 +171,7 @@ func RunDefaultMode(manifest utils.ProjectManifest) error {
 
 	for _, command := range gitCommands {
 		if err := command.RunCmd(); err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 	}
