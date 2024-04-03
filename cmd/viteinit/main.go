@@ -37,5 +37,7 @@ func main() {
 		manifest.ProjectName = fmt.Sprintf("%s %s", pref, manifest.ProjectName)
 	}
 
-	mode.RunDefaultMode(manifest)
+	if err := mode.RunDefaultMode(manifest); err != nil {
+		log.Fatal(err)
+	}
 }

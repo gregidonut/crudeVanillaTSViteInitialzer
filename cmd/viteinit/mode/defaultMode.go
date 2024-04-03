@@ -11,7 +11,7 @@ import (
 
 // RunDefaultMode is the default logic that runs after
 // initial crude error check if no mode is selected.
-func RunDefaultMode(manifest utils.ProjectManifest) {
+func RunDefaultMode(manifest utils.ProjectManifest) error {
 
 	initialCommands := []runcommand.Command{
 		{
@@ -156,4 +156,5 @@ func RunDefaultMode(manifest utils.ProjectManifest) {
 
 	}
 
+	return nil
 }
